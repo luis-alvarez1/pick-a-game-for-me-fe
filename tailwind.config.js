@@ -22,4 +22,5 @@ export default {
     future: {
         hoverOnlyWhenSupported: true,
     },
+    important: true,
 };
