@@ -25,6 +25,8 @@ pipeline {
                     echo "Node version: $(node --version)"
                     echo "NPM version: $(npm --version)"
                     echo "Docker version: $(docker --version)"
+                    npm install -g yarn --force
+                    echo "Yarn version: $(yarn --version)"
                 '''
             }
         }
