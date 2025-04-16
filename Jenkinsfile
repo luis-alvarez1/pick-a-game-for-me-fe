@@ -10,6 +10,7 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         DOCKER_IMAGE = 'luisalvarez1106/pick-a-game-for-me-front'
         DOCKER_TAG = "${BUILD_NUMBER}"
+        NODE_ENV = 'production'
     }
 
     stages {
