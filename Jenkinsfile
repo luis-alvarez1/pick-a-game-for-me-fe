@@ -50,7 +50,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'yarn install --frozen-lockfile'
+                sh 'yarn install'
             }
         }
 
