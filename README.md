@@ -39,22 +39,50 @@ A modern web application to manage your game collection and help you decide what
     -   Tailwind CSS
     -   React Router
     -   React Hot Toast
-    -   Axios
+    -   Vite
+    -   Docker
+    -   Nginx
 
 -   **Backend**
     -   NestJS
     -   PostgreSQL
     -   JWT Authentication
+    -   Docker
 
 ## Getting Started
 
 ### Prerequisites
 
--   Node.js (v16 or higher)
--   npm or yarn
--   Access to the backend API (see [backend repository](https://github.com/luis-alvarez1/pick-a-game-for-me-be))
+-   Docker and Docker Compose
+-   Git
 
 ### Installation
+
+#### Using Docker (Recommended)
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/luis-alvarez1/pick-a-game-for-me-fe.git
+    cd pick-a-game-for-me-fe
+    ```
+
+2. Create the PostgreSQL data directory:
+
+    ```bash
+    sudo mkdir -p /data/postgresql-games
+    sudo chown -R 70:70 /data/postgresql-games
+    ```
+
+3. Start the application:
+
+    ```bash
+    docker-compose up -d
+    ```
+
+4. Access the application at [http://localhost:3001](http://localhost:3001)
+
+#### Local Development
 
 1. Clone the repository:
 
@@ -66,54 +94,74 @@ A modern web application to manage your game collection and help you decide what
 2. Install dependencies:
 
     ```bash
-    npm install
-    # or
     yarn install
     ```
 
-3. Configure the API host:
-
-    - Open `src/services/apiService.ts`
-    - Update the `baseURL` in the `axios.create()` call to match your backend URL:
-        ```typescript
-        const api = axios.create({
-            baseURL: "http://your-backend-url:3000",
-            // ... rest of the configuration
-        });
-        ```
-
-4. Start the development server:
+3. Start the development server:
 
     ```bash
-    npm run dev
-    # or
     yarn dev
     ```
 
-5. Open [http://localhost:5173](http://localhost:5173) in your browser.
+4. Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## Project Structure
 
 ```
-src/
-├── components/         # Reusable UI components
-│   ├── games/         # Game-related components
-│   ├── layout/        # Layout components
-│   ├── platforms/     # Platform-related components
-│   └── ui/            # Basic UI components
-├── pages/             # Page components
-├── services/          # API services
-├── types/             # TypeScript types
-└── utils/             # Utility functions
+├── src/
+│   ├── components/     # Reusable UI components
+│   ├── pages/         # Page components
+│   ├── services/      # API services
+│   ├── types/         # TypeScript types
+│   └── utils/         # Utility functions
+├── docker-compose.yml # Docker Compose configuration
+├── Dockerfile        # Frontend Docker configuration
+├── nginx.conf       # Nginx reverse proxy configuration
+└── tailwind.config.js # Tailwind CSS configuration
 ```
+
+## Docker Configuration
+
+The application uses Docker Compose to orchestrate three services:
+
+-   **Frontend** (port 3001)
+
+    -   Nginx-based container serving the React application
+    -   Handles static file serving and API proxying
+    -   Built with Vite and TypeScript
+
+-   **Backend** (port 8001)
+
+    -   NestJS application
+    -   Handles API requests and business logic
+    -   Communicates with PostgreSQL
+
+-   **PostgreSQL** (port 5432)
+    -   Persistent data storage
+    -   Data stored in `/data/postgresql-games`
+
+### Environment Variables
+
+-   Frontend:
+
+    -   `VITE_BACKEND_URL`: API endpoint (/api)
+
+-   Backend:
+    -   `DB_HOST`: PostgreSQL host
+    -   `DB_PORT`: PostgreSQL port
+    -   `DB_USER`: Database user
+    -   `DB_PW`: Database password
+    -   `DB_NAME`: Database name
+    -   `JWT_SECRET`: JWT signing secret
 
 ## API Integration
 
-The application integrates with a NestJS backend API. All API requests require authentication using JWT tokens. The following endpoints are used:
+The application uses a reverse proxy setup with Nginx:
 
--   Authentication: `/auth/login`, `/users/signup`
--   Games: `/games`, `/games/:id`, `/games/search`, `/games/pick`
--   Platforms: `/platforms`, `/platforms/:id`
+-   All API requests are proxied through `/api` to the backend service
+-   Authentication endpoints: `/api/auth/login`, `/api/users/signup`
+-   Game endpoints: `/api/games`, `/api/games/:id`, `/api/games/search`, `/api/games/pick`
+-   Platform endpoints: `/api/platforms`, `/api/platforms/:id`
 
 ## Contributing
 
@@ -133,3 +181,5 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 -   [TypeScript](https://www.typescriptlang.org/)
 -   [Tailwind CSS](https://tailwindcss.com/)
 -   [NestJS](https://nestjs.com/)
+-   [Docker](https://www.docker.com/)
+-   [Nginx](https://nginx.org/)

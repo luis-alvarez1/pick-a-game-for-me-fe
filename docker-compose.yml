@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+    frontend:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "3001:3001"
+        environment:
+            - VITE_BACKEND_URL=/api
+        depends_on:
+            - backend
+        networks:
+            - app-network
+
+    backend:
+        image: luisalvarez1106/pick-a-game-for-me-back:latest
+        ports:
+            - "8001:3000"
+        environment:
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_USER=postgres
+            - DB_PW=postgres
+            - DB_NAME=games
+            - JWT_SECRET=your-secret-key
+        depends_on:
+            - postgres
+        networks:
+            - app-network
+
+    postgres:
+        image: postgres:15-alpine
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=games
+        volumes:
+            - /data/postgresql-games:/var/lib/postgresql/data
+        networks:
+            - app-network
+
+networks:
+    app-network:
+        driver: bridge
