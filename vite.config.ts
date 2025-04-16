@@ -9,5 +9,13 @@ export default defineConfig({
     },
     build: {
         sourcemap: true,
+        rollupOptions: {
+            output: {
+                manualChunks: undefined,
+            },
+        },
+    },
+    optimizeDeps: {
+        include: ["tailwindcss", "autoprefixer"],
     },
 });
