@@ -19,4 +19,7 @@ export default {
             pattern: /.*/,
         },
     ],
+    future: {
+        hoverOnlyWhenSupported: true,
+    },
 };
