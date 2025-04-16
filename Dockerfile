@@ -29,9 +29,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Verify the content and permissions
-RUN ls -la /usr/share/nginx/html && \
-    ls -la /usr/share/nginx/html/assets && \
-    chmod -R 755 /usr/share/nginx/html
+RUN chmod -R 755 /usr/share/nginx/html
 
 EXPOSE 3001
 

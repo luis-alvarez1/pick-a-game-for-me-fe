@@ -57,7 +57,6 @@ pipeline {
             steps {
                 sh '''
                     yarn build --mode production
-                    cat dist/assets/index-*.css
                 '''
             }
         }
