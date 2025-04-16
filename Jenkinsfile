@@ -56,11 +56,7 @@ pipeline {
         stage('Build Application') {
             steps {
                 sh '''
-                    pwd
-                    ls -la
                     yarn build --mode production
-                    ls -la dist
-                    ls -la dist/assets
                     cat dist/assets/index-*.css
                 '''
             }
