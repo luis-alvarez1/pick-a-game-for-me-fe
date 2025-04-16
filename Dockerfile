@@ -16,8 +16,16 @@ RUN yarn build
 
 FROM nginx:alpine
 
+# Copy the built assets
 COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy and setup nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Verify the content and permissions
+RUN ls -la /usr/share/nginx/html && \
+    ls -la /usr/share/nginx/html/assets && \
+    chmod -R 755 /usr/share/nginx/html
 
 # Create a script to replace the backend URL
 RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
