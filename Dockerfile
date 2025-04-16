@@ -19,6 +19,12 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Create a script to replace the backend URL
+RUN echo '#!/bin/sh\n\
+sed -i "s|http://backend:3000|$VITE_BACKEND_URL|g" /etc/nginx/conf.d/default.conf\n\
+exec nginx -g "daemon off;"' > /docker-entrypoint.sh && \
+chmod +x /docker-entrypoint.sh
+
 EXPOSE 3001
 
-CMD ["nginx", "-g", "daemon off;"] 
+ENTRYPOINT ["/docker-entrypoint.sh"] 
