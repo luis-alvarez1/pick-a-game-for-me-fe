@@ -12,7 +12,7 @@ COPY . .
 ARG VITE_BACKEND_URL
 ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
 
-RUN	yarn build --mode production
+RUN yarn build --mode production
 
 FROM nginx:alpine
 
