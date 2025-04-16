@@ -37,6 +37,16 @@ pipeline {
             }
         }
 
+        stage('Clean Workspace') {
+            steps {
+                sh '''
+                    rm -rf node_modules
+                    rm -rf dist
+                    rm -rf .next
+                '''
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 sh 'yarn install --frozen-lockfile'
@@ -45,7 +55,11 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                sh 'yarn build'
+                sh '''
+                    yarn build
+                    ls -la dist
+                    cat dist/assets/index-*.css
+                '''
             }
         }
 
