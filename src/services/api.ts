@@ -1,5 +1,5 @@
 const API_BASE_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:8001";
 
 const getHeaders = () => {
     const token = localStorage.getItem("token");
