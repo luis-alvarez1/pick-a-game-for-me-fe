@@ -13,11 +13,11 @@ RUN yarn install --frozen-lockfile --production=false && \
 # Copy source files
 COPY . .
 
-ARG VITE_BACKEND_URL="http://backend:8001"
+ARG VITE_BACKEND_URL="/api"
 ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
 
 # Build with production mode and clean up
-RUN VITE_BACKEND_URL=${VITE_BACKEND_URL} yarn build --mode production && \
+RUN yarn build --mode production && \
     rm -rf node_modules
 
 FROM nginx:alpine
@@ -33,12 +33,6 @@ RUN ls -la /usr/share/nginx/html && \
     ls -la /usr/share/nginx/html/assets && \
     chmod -R 755 /usr/share/nginx/html
 
-# Create a script to replace the backend URL
-RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
-    echo 'sed -i "s|http://backend:8001|$VITE_BACKEND_URL|g" /etc/nginx/conf.d/default.conf' >> /docker-entrypoint.sh && \
-    echo 'exec nginx -g "daemon off;"' >> /docker-entrypoint.sh && \
-    chmod +x /docker-entrypoint.sh
-
 EXPOSE 3001
 
-ENTRYPOINT ["/docker-entrypoint.sh"] 
+CMD ["nginx", "-g", "daemon off;"] 
