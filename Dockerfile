@@ -20,10 +20,10 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Create a script to replace the backend URL
-RUN echo '#!/bin/sh\n\
-sed -i "s|http://backend:3000|$VITE_BACKEND_URL|g" /etc/nginx/conf.d/default.conf\n\
-exec nginx -g "daemon off;"' > /docker-entrypoint.sh && \
-chmod +x /docker-entrypoint.sh
+RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
+    echo 'sed -i "s|http://backend:3000|$VITE_BACKEND_URL|g" /etc/nginx/conf.d/default.conf' >> /docker-entrypoint.sh && \
+    echo 'exec nginx -g "daemon off;"' >> /docker-entrypoint.sh && \
+    chmod +x /docker-entrypoint.sh
 
 EXPOSE 3001
 
