@@ -15,7 +15,6 @@ COPY . .
 
 ARG VITE_BACKEND_URL
 ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
-ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 # Build with production mode and clean up
 RUN yarn build --mode production && \
