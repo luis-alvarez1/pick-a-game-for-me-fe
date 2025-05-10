@@ -9,6 +9,7 @@ import { authService } from "../services/authService";
 import { GameModal } from "../components/games/GameModal";
 import { AddGameModal } from "../components/games/AddGameModal";
 import { showError, showSuccess } from "../utils/toast";
+import { GamesSearchBar } from "../components/games/GamesSearchBar";
 
 export const GamesPage = () => {
     const navigate = useNavigate();
@@ -18,6 +19,11 @@ export const GamesPage = () => {
     const [isPicking, setIsPicking] = useState(false);
     const [selectedGame, setSelectedGame] = useState<Game | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedPlatform, setSelectedPlatform] = useState<number | null>(
+        null
+    );
+    const [showCompleted, setShowCompleted] = useState<boolean | null>(null);
 
     useEffect(() => {
         let mounted = true;
@@ -31,11 +37,32 @@ export const GamesPage = () => {
             try {
                 setIsLoading(true);
                 const [gamesData, platformsData] = await Promise.all([
-                    gameService.getAll(),
+                    gameService.search({
+                        name: searchQuery || undefined,
+                        platformId: selectedPlatform || undefined,
+                        completed:
+                            showCompleted !== null ? showCompleted : undefined,
+                    }),
                     platformService.getAll(),
                 ]);
                 if (mounted) {
-                    setGames(gamesData);
+                    function hasGamesArray(
+                        obj: unknown
+                    ): obj is { games: Game[] } {
+                        return (
+                            typeof obj === "object" &&
+                            obj !== null &&
+                            "games" in obj &&
+                            Array.isArray((obj as { games: unknown }).games)
+                        );
+                    }
+                    let gamesArray: Game[] = [];
+                    if (Array.isArray(gamesData)) {
+                        gamesArray = gamesData;
+                    } else if (hasGamesArray(gamesData)) {
+                        gamesArray = (gamesData as { games: Game[] }).games;
+                    }
+                    setGames(gamesArray);
                     setPlatforms(platformsData);
                 }
             } catch (err) {
@@ -64,7 +91,7 @@ export const GamesPage = () => {
         return () => {
             mounted = false;
         };
-    }, [navigate]);
+    }, [navigate, searchQuery, selectedPlatform, showCompleted]);
 
     const handleToggleComplete = async (gameId: number, completed: boolean) => {
         try {
@@ -142,7 +169,21 @@ export const GamesPage = () => {
                 </div>
             </div>
 
-            {games.length === 0 ? (
+            <GamesSearchBar
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                selectedPlatform={selectedPlatform}
+                setSelectedPlatform={setSelectedPlatform}
+                showCompleted={showCompleted}
+                setShowCompleted={setShowCompleted}
+                platforms={platforms}
+            />
+
+            {!Array.isArray(games) ? (
+                <div className="text-center py-12">
+                    <p className="text-red-400">Games data is invalid</p>
+                </div>
+            ) : games.length === 0 ? (
                 <div className="text-center py-12">
                     <p className="text-gray-400">No games found</p>
                 </div>
