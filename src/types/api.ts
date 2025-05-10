@@ -58,3 +58,13 @@ export interface UpdateUserRequest {
     name?: string;
     email?: string;
 }
+
+export interface PaginatedGamesResponse {
+    data: Game[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}

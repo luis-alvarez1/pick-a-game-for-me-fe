@@ -13,6 +13,8 @@ A modern web application to manage your game collection and help you decide what
     -   View game details
     -   Filter games by platform and completion status
     -   Search games by name
+    -   Paginated game list with customizable page size
+    -   Smart pagination controls with first/last page navigation
 
 -   🎲 **Random Game Picker**
 
@@ -110,6 +112,13 @@ A modern web application to manage your game collection and help you decide what
 ```
 ├── src/
 │   ├── components/     # Reusable UI components
+│   │   ├── games/     # Game-related components
+│   │   │   ├── GameCard.tsx
+│   │   │   ├── GameModal.tsx
+│   │   │   ├── GamesList.tsx
+│   │   │   ├── GamesSearchBar.tsx
+│   │   │   └── Pagination.tsx
+│   │   └── ui/        # Common UI components
 │   ├── pages/         # Page components
 │   ├── services/      # API services
 │   ├── types/         # TypeScript types
@@ -160,8 +169,22 @@ The application uses a reverse proxy setup with Nginx:
 
 -   All API requests are proxied through `/api` to the backend service
 -   Authentication endpoints: `/api/auth/login`, `/api/users/signup`
--   Game endpoints: `/api/games`, `/api/games/:id`, `/api/games/search`, `/api/games/pick`
+-   Game endpoints:
+    -   `/api/games` - List all games
+    -   `/api/games/:id` - Get game details
+    -   `/api/games/search` - Search games with pagination
+    -   `/api/games/pick` - Pick a random game
 -   Platform endpoints: `/api/platforms`, `/api/platforms/:id`
+
+### Pagination
+
+The game list supports pagination with the following features:
+
+-   Configurable page size (10, 25, 50, or 100 items per page)
+-   Smart pagination controls showing current page context
+-   First/last page navigation
+-   Total items and pages count
+-   Automatic page reset when filters change
 
 ## Contributing
 

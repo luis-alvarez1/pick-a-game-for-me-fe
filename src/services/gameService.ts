@@ -29,15 +29,21 @@ export const gameService = {
         name?: string;
         completed?: boolean;
         platformId?: number;
-    }): Promise<Game[]> => {
+        page?: number;
+        limit?: number;
+    }): Promise<import("../types/api").PaginatedGamesResponse> => {
         const queryParams = new URLSearchParams();
         if (params.name) queryParams.append("name", params.name);
         if (params.completed !== undefined)
             queryParams.append("completed", params.completed.toString());
         if (params.platformId)
             queryParams.append("platformId", params.platformId.toString());
+        if (params.page) queryParams.append("page", params.page.toString());
+        if (params.limit) queryParams.append("limit", params.limit.toString());
 
-        return api.get<Game[]>(`/games/search?${queryParams.toString()}`);
+        return api.get<import("../types/api").PaginatedGamesResponse>(
+            `/games/search?${queryParams.toString()}`
+        );
     },
 
     pickRandom: async (): Promise<Game> => {

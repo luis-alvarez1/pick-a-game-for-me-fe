@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Game, Platform } from "../types/api";
 import { gameService } from "../services/gameService";
 import { platformService } from "../services/platformService";
-import { GameCard } from "../components/games/GameCard";
 import { Button } from "../components/ui/Button";
 import { authService } from "../services/authService";
 import { GameModal } from "../components/games/GameModal";
 import { AddGameModal } from "../components/games/AddGameModal";
 import { showError, showSuccess } from "../utils/toast";
 import { GamesSearchBar } from "../components/games/GamesSearchBar";
+import { Pagination } from "../components/games/Pagination";
+import { GamesList } from "../components/games/GamesList";
 
 export const GamesPage = () => {
     const navigate = useNavigate();
@@ -24,6 +25,10 @@ export const GamesPage = () => {
         null
     );
     const [showCompleted, setShowCompleted] = useState<boolean | null>(null);
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(50);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalGames, setTotalGames] = useState(0);
 
     useEffect(() => {
         let mounted = true;
@@ -36,33 +41,21 @@ export const GamesPage = () => {
 
             try {
                 setIsLoading(true);
-                const [gamesData, platformsData] = await Promise.all([
+                const [gamesResponse, platformsData] = await Promise.all([
                     gameService.search({
                         name: searchQuery || undefined,
                         platformId: selectedPlatform || undefined,
                         completed:
                             showCompleted !== null ? showCompleted : undefined,
+                        page,
+                        limit,
                     }),
                     platformService.getAll(),
                 ]);
                 if (mounted) {
-                    function hasGamesArray(
-                        obj: unknown
-                    ): obj is { games: Game[] } {
-                        return (
-                            typeof obj === "object" &&
-                            obj !== null &&
-                            "games" in obj &&
-                            Array.isArray((obj as { games: unknown }).games)
-                        );
-                    }
-                    let gamesArray: Game[] = [];
-                    if (Array.isArray(gamesData)) {
-                        gamesArray = gamesData;
-                    } else if (hasGamesArray(gamesData)) {
-                        gamesArray = (gamesData as { games: Game[] }).games;
-                    }
-                    setGames(gamesArray);
+                    setGames(gamesResponse.data);
+                    setTotalPages(gamesResponse.meta.totalPages);
+                    setTotalGames(gamesResponse.meta.total);
                     setPlatforms(platformsData);
                 }
             } catch (err) {
@@ -91,7 +84,7 @@ export const GamesPage = () => {
         return () => {
             mounted = false;
         };
-    }, [navigate, searchQuery, selectedPlatform, showCompleted]);
+    }, [navigate, searchQuery, selectedPlatform, showCompleted, page, limit]);
 
     const handleToggleComplete = async (gameId: number, completed: boolean) => {
         try {
@@ -144,6 +137,32 @@ export const GamesPage = () => {
         }
     };
 
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setPage(newPage);
+        }
+    };
+
+    const handleLimitChange = (newLimit: number) => {
+        setLimit(newLimit);
+        setPage(1);
+    };
+
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
+        setPage(1);
+    };
+
+    const handlePlatformChange = (platformId: number | null) => {
+        setSelectedPlatform(platformId);
+        setPage(1);
+    };
+
+    const handleShowCompletedChange = (value: boolean | null) => {
+        setShowCompleted(value);
+        setPage(1);
+    };
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -171,33 +190,28 @@ export const GamesPage = () => {
 
             <GamesSearchBar
                 searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
+                setSearchQuery={handleSearch}
                 selectedPlatform={selectedPlatform}
-                setSelectedPlatform={setSelectedPlatform}
+                setSelectedPlatform={handlePlatformChange}
                 showCompleted={showCompleted}
-                setShowCompleted={setShowCompleted}
+                setShowCompleted={handleShowCompletedChange}
                 platforms={platforms}
             />
 
-            {!Array.isArray(games) ? (
-                <div className="text-center py-12">
-                    <p className="text-red-400">Games data is invalid</p>
-                </div>
-            ) : games.length === 0 ? (
-                <div className="text-center py-12">
-                    <p className="text-gray-400">No games found</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {games.map((game) => (
-                        <GameCard
-                            key={game.id}
-                            game={game}
-                            onToggleComplete={handleToggleComplete}
-                        />
-                    ))}
-                </div>
-            )}
+            <div className="flex justify-end mb-4">
+                <select
+                    value={limit}
+                    onChange={(e) => handleLimitChange(Number(e.target.value))}
+                    className="rounded-md bg-gray-700 border-gray-600 text-gray-100 focus:border-sky-500 focus:ring-sky-500"
+                >
+                    <option value="10">10 per page</option>
+                    <option value="25">25 per page</option>
+                    <option value="50">50 per page</option>
+                    <option value="100">100 per page</option>
+                </select>
+            </div>
+
+            <GamesList games={games} onToggleComplete={handleToggleComplete} />
 
             {selectedGame && (
                 <GameModal
@@ -213,6 +227,18 @@ export const GamesPage = () => {
                     onAdd={handleAddGame}
                 />
             )}
+
+            {totalPages > 1 && (
+                <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                />
+            )}
+
+            <div className="flex justify-center mt-2 text-gray-400 text-sm">
+                Showing page {page} of {totalPages} ({totalGames} games)
+            </div>
         </div>
     );
 };
