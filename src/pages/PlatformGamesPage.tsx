@@ -39,7 +39,7 @@ export const PlatformGamesPage = () => {
                 ]);
 
                 setPlatform(platformData);
-                setGames(gamesData);
+                setGames(gamesData.data);
             } catch (err) {
                 setError("Failed to load platform games");
                 console.error(err);
