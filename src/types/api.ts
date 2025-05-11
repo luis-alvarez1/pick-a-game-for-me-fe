@@ -21,12 +21,14 @@ export interface Game {
 export interface LoginRequest {
     email: string;
     password: string;
+    [key: string]: string | number | boolean;
 }
 
 export interface SignupRequest {
     email: string;
     password: string;
     name: string;
+    [key: string]: string | number | boolean;
 }
 
 export interface AuthResponse {
@@ -38,12 +40,14 @@ export interface CreateGameRequest {
     name: string;
     platformId: number;
     completed: boolean;
+    [key: string]: string | number | boolean;
 }
 
 export interface UpdateGameRequest {
     name?: string;
     platformId?: number;
     completed?: boolean;
+    [key: string]: string | number | boolean | undefined;
 }
 
 export interface CreatePlatformRequest {

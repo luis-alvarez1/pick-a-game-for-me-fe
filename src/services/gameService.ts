@@ -1,59 +1,52 @@
-import api from "./api";
-import {
-    Game,
-    CreateGameRequest,
-    UpdateGameRequest,
-    PaginatedGamesResponse,
-} from "../types/api";
+import { api } from "./api";
+import { Game, CreateGameRequest, UpdateGameRequest } from "../types/api";
 
-class GameService {
-    async getAll(): Promise<Game[]> {
-        const response = await api.get<Game[]>("/games");
-        return response.data;
-    }
+export const gameService = {
+    getAll: async (search?: string): Promise<Game[]> => {
+        const endpoint = search
+            ? `/games?search=${encodeURIComponent(search)}`
+            : "/games";
+        return api.get<Game[]>(endpoint);
+    },
 
-    async getById(id: number): Promise<Game> {
-        const response = await api.get<Game>(`/games/${id}`);
-        return response.data;
-    }
+    getById: async (id: number): Promise<Game> => {
+        return api.get<Game>(`/games/${id}`);
+    },
 
-    async create(data: CreateGameRequest): Promise<Game> {
-        const response = await api.post<Game>("/games", data);
-        return response.data;
-    }
+    create: async (data: CreateGameRequest): Promise<Game> => {
+        return api.post<Game>("/games", data);
+    },
 
-    async update(id: number, data: UpdateGameRequest): Promise<Game> {
-        const response = await api.patch<Game>(`/games/${id}`, data);
-        return response.data;
-    }
+    update: async (id: number, data: UpdateGameRequest): Promise<Game> => {
+        return api.put<Game>(`/games/${id}`, data);
+    },
 
-    async delete(id: number): Promise<void> {
-        await api.delete(`/games/${id}`);
-    }
+    delete: async (id: number): Promise<void> => {
+        await api.delete<{ message: string }>(`/games/${id}`);
+    },
 
-    async toggleComplete(id: number, completed: boolean): Promise<Game> {
-        const response = await api.patch<Game>(`/games/${id}`, { completed });
-        return response.data;
-    }
-
-    async pickRandom(): Promise<Game> {
-        const response = await api.get<Game>("/games/pick");
-        return response.data;
-    }
-
-    async search(params: {
+    search: async (params: {
         name?: string;
-        platformId?: number;
         completed?: boolean;
+        platformId?: number;
         page?: number;
         limit?: number;
-    }): Promise<PaginatedGamesResponse> {
-        const response = await api.get<PaginatedGamesResponse>(
-            "/games/search",
-            { params }
-        );
-        return response.data;
-    }
-}
+    }): Promise<import("../types/api").PaginatedGamesResponse> => {
+        const queryParams = new URLSearchParams();
+        if (params.name) queryParams.append("name", params.name);
+        if (params.completed !== undefined)
+            queryParams.append("completed", params.completed.toString());
+        if (params.platformId)
+            queryParams.append("platformId", params.platformId.toString());
+        if (params.page) queryParams.append("page", params.page.toString());
+        if (params.limit) queryParams.append("limit", params.limit.toString());
 
-export const gameService = new GameService();
+        return api.get<import("../types/api").PaginatedGamesResponse>(
+            `/games/search?${queryParams.toString()}`
+        );
+    },
+
+    pickRandom: async (): Promise<Game> => {
+        return api.get<Game>("/games/pick");
+    },
+};

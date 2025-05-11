@@ -5,6 +5,7 @@ import { platformService } from "../services/platformService";
 import { GameCard } from "../components/games/GameCard";
 import { Button } from "../components/ui/Button";
 import { Game, Platform } from "../types/api";
+import { Pagination } from "../components/games/Pagination";
 
 export const PlatformGamesPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -12,6 +13,10 @@ export const PlatformGamesPage = () => {
     const [platform, setPlatform] = useState<Platform | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(50);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalGames, setTotalGames] = useState(0);
 
     const handleToggleComplete = async (gameId: number, completed: boolean) => {
         try {
@@ -26,6 +31,17 @@ export const PlatformGamesPage = () => {
         }
     };
 
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setPage(newPage);
+        }
+    };
+
+    const handleLimitChange = (newLimit: number) => {
+        setLimit(newLimit);
+        setPage(1);
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -35,11 +51,13 @@ export const PlatformGamesPage = () => {
                 const platformId = parseInt(id!, 10);
                 const [platformData, gamesData] = await Promise.all([
                     platformService.getById(platformId),
-                    gameService.search({ platformId }),
+                    gameService.search({ platformId, page, limit }),
                 ]);
 
                 setPlatform(platformData);
                 setGames(gamesData.data);
+                setTotalPages(gamesData.meta.totalPages);
+                setTotalGames(gamesData.meta.total);
             } catch (err) {
                 setError("Failed to load platform games");
                 console.error(err);
@@ -51,7 +69,7 @@ export const PlatformGamesPage = () => {
         if (id) {
             fetchData();
         }
-    }, [id]);
+    }, [id, page, limit]);
 
     if (isLoading) {
         return (
@@ -86,6 +104,19 @@ export const PlatformGamesPage = () => {
                 </h1>
             </div>
 
+            <div className="flex justify-end mb-4">
+                <select
+                    value={limit}
+                    onChange={(e) => handleLimitChange(Number(e.target.value))}
+                    className="rounded-md bg-gray-700 border-gray-600 text-gray-100 focus:border-sky-500 focus:ring-sky-500"
+                >
+                    <option value="10">10 per page</option>
+                    <option value="25">25 per page</option>
+                    <option value="50">50 per page</option>
+                    <option value="100">100 per page</option>
+                </select>
+            </div>
+
             {games.length === 0 ? (
                 <div className="text-center py-12">
                     <p className="text-gray-600">
@@ -103,6 +134,18 @@ export const PlatformGamesPage = () => {
                     ))}
                 </div>
             )}
+
+            {totalPages > 1 && (
+                <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                />
+            )}
+
+            <div className="flex justify-center mt-2 text-gray-400 text-sm">
+                Showing page {page} of {totalPages} ({totalGames} games)
+            </div>
         </div>
     );
 };

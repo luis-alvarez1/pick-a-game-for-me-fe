@@ -10,11 +10,21 @@ import { GamesPage } from "./pages/GamesPage";
 import { GameDetailsPage } from "./pages/GameDetailsPage";
 import { PlatformsPage } from "./pages/PlatformsPage";
 import { PlatformGamesPage } from "./pages/PlatformGamesPage";
-import { authService } from "./services/auth.service";
+import { authService } from "./services/authService";
+import { Layout } from "./components/layout/Layout";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-    if (!authService.isAuthenticated()) {
+    const isAuthenticated = authService.isAuthenticated();
+    if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
+    }
+    return <Layout>{children}</Layout>;
+};
+
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+    const isAuthenticated = authService.isAuthenticated();
+    if (isAuthenticated) {
+        return <Navigate to="/games" replace />;
     }
     return <>{children}</>;
 };
@@ -28,11 +38,9 @@ export const App = () => {
                     <Route
                         path="/login"
                         element={
-                            authService.isAuthenticated() ? (
-                                <Navigate to="/games" replace />
-                            ) : (
+                            <PublicRoute>
                                 <LoginPage />
-                            )
+                            </PublicRoute>
                         }
                     />
                     <Route
@@ -60,7 +68,7 @@ export const App = () => {
                         }
                     />
                     <Route
-                        path="/platforms/:id"
+                        path="/platforms/:id/games"
                         element={
                             <PrivateRoute>
                                 <PlatformGamesPage />

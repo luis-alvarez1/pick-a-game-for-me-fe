@@ -1,66 +1,61 @@
-import api from "./api";
+import { api } from "./api";
 import { LoginRequest, SignupRequest, AuthResponse, User } from "../types/api";
-import { storageService } from "./storage.service";
 
-class AuthService {
-    private readonly TOKEN_KEY = "auth_token";
-    private readonly USER_KEY = "user";
+export const authService = {
+    login: async (credentials: LoginRequest): Promise<AuthResponse> => {
+        const response = await api.post<AuthResponse>(
+            "/auth/login",
+            credentials
+        );
+        if (response.token) {
+            localStorage.setItem("token", response.token);
+            const user = await authService.getUser();
+            if (user) {
+                localStorage.setItem("userName", user.name);
+            }
+        }
+        return response;
+    },
 
-    async login(data: LoginRequest): Promise<AuthResponse> {
-        const response = await api.post<AuthResponse>("/auth/login", data);
-        storageService.setItem(this.TOKEN_KEY, response.data.token);
-        storageService.setItem(this.USER_KEY, JSON.stringify(response.data));
-        return response.data;
-    }
-
-    async signup(data: SignupRequest): Promise<AuthResponse> {
+    signup: async (data: SignupRequest): Promise<AuthResponse> => {
         const response = await api.post<AuthResponse>("/users/signup", data);
-        storageService.setItem(this.TOKEN_KEY, response.data.token);
-        storageService.setItem(this.USER_KEY, JSON.stringify(response.data));
-        return response.data;
-    }
+        if (response.token) {
+            localStorage.setItem("token", response.token);
+            const user = await authService.getUser();
+            if (user) {
+                localStorage.setItem("userName", user.name);
+            }
+        }
+        return response;
+    },
 
-    async getCurrentUser(): Promise<User> {
-        const response = await api.get<User>("/users/me");
-        return response.data;
-    }
-
-    getToken(): string | null {
-        return storageService.getItem(this.TOKEN_KEY);
-    }
-
-    getUser(): User | null {
-        const userStr = storageService.getItem(this.USER_KEY);
-        if (!userStr) return null;
+    getUser: async (): Promise<User | null> => {
         try {
-            return JSON.parse(userStr);
-        } catch {
+            const response = await api.get<User>("/users/me");
+            return response;
+        } catch (error) {
+            console.error("Failed to get user:", error);
             return null;
         }
-    }
+    },
 
-    isAuthenticated(): boolean {
-        const token = this.getToken();
+    logout: () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userName");
+        window.location.href = "/login";
+    },
+
+    getToken: (): string | null => {
+        return localStorage.getItem("token");
+    },
+
+    isAuthenticated: (): boolean => {
+        const token = localStorage.getItem("token");
         if (!token) return false;
+        return true;
+    },
 
-        try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            const expirationTime = payload.exp * 1000;
-            return Date.now() < expirationTime;
-        } catch {
-            return false;
-        }
-    }
-
-    logout(): void {
-        storageService.removeItem(this.TOKEN_KEY);
-        storageService.removeItem(this.USER_KEY);
-    }
-
-    getUserName(): string | null {
-        const user = this.getUser();
-        return user?.name || null;
-    }
-}
-
-export const authService = new AuthService();
+    getUserName: (): string | null => {
+        return localStorage.getItem("userName");
+    },
+};

@@ -97,7 +97,10 @@ export const PlatformsPage = () => {
                     {platforms.map((platform) => (
                         <div
                             key={platform.id}
-                            className="bg-gray-800 rounded-lg p-6 shadow-lg"
+                            className="bg-gray-800 rounded-lg p-6 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-700 hover:border-sky-500"
+                            onClick={() =>
+                                navigate(`/platforms/${platform.id}/games`)
+                            }
                         >
                             <h3 className="text-xl font-semibold text-gray-100">
                                 {platform.name}
