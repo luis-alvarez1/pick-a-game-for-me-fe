@@ -29,14 +29,14 @@ export const App = () => {
                         path="/login"
                         element={
                             authService.isAuthenticated() ? (
-                                <Navigate to="/" replace />
+                                <Navigate to="/games" replace />
                             ) : (
                                 <LoginPage />
                             )
                         }
                     />
                     <Route
-                        path="/"
+                        path="/games"
                         element={
                             <PrivateRoute>
                                 <GamesPage />
@@ -66,6 +66,10 @@ export const App = () => {
                                 <PlatformGamesPage />
                             </PrivateRoute>
                         }
+                    />
+                    <Route
+                        path="/"
+                        element={<Navigate to="/games" replace />}
                     />
                 </Routes>
             </Router>
