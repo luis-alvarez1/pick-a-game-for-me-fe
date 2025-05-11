@@ -18,7 +18,7 @@ export const gameService = {
     },
 
     update: async (id: number, data: UpdateGameRequest): Promise<Game> => {
-        return api.put<Game>(`/games/${id}`, data);
+        return api.patch<Game>(`/games/${id}`, data);
     },
 
     delete: async (id: number): Promise<void> => {

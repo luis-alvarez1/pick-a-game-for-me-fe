@@ -15,7 +15,7 @@ export const platformService = {
     },
 
     update: async (id: number, data: Partial<Platform>): Promise<Platform> => {
-        return api.put<Platform>(`/platforms/${id}`, data);
+        return api.patch<Platform>(`/platforms/${id}`, data);
     },
 
     delete: async (id: number): Promise<void> => {

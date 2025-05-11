@@ -55,12 +55,12 @@ export const api = {
         return handleResponse<T>(response);
     },
 
-    put: async <T>(
+    patch: async <T>(
         endpoint: string,
         data: { [key: string]: string | number | boolean | undefined }
     ): Promise<T> => {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: "PUT",
+            method: "PATCH",
             headers: getHeaders(),
             body: JSON.stringify(data),
         });
