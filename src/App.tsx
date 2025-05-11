@@ -10,23 +10,13 @@ import { GamesPage } from "./pages/GamesPage";
 import { GameDetailsPage } from "./pages/GameDetailsPage";
 import { PlatformsPage } from "./pages/PlatformsPage";
 import { PlatformGamesPage } from "./pages/PlatformGamesPage";
-import { authService } from "./services/authService";
-import { Layout } from "./components/layout/Layout";
+import { authService } from "./services/auth.service";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-    return authService.isAuthenticated() ? (
-        <Layout>{children}</Layout>
-    ) : (
-        <Navigate to="/login" replace />
-    );
-};
-
-const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-    return !authService.isAuthenticated() ? (
-        <>{children}</>
-    ) : (
-        <Navigate to="/games" replace />
-    );
+    if (!authService.isAuthenticated()) {
+        return <Navigate to="/login" replace />;
+    }
+    return <>{children}</>;
 };
 
 export const App = () => {
@@ -38,13 +28,15 @@ export const App = () => {
                     <Route
                         path="/login"
                         element={
-                            <PublicRoute>
+                            authService.isAuthenticated() ? (
+                                <Navigate to="/" replace />
+                            ) : (
                                 <LoginPage />
-                            </PublicRoute>
+                            )
                         }
                     />
                     <Route
-                        path="/games"
+                        path="/"
                         element={
                             <PrivateRoute>
                                 <GamesPage />
@@ -68,21 +60,11 @@ export const App = () => {
                         }
                     />
                     <Route
-                        path="/platforms/:id/games"
+                        path="/platforms/:id"
                         element={
                             <PrivateRoute>
                                 <PlatformGamesPage />
                             </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/"
-                        element={
-                            authService.isAuthenticated() ? (
-                                <Navigate to="/games" replace />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
                         }
                     />
                 </Routes>
